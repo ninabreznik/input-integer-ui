@@ -4,15 +4,17 @@ const sheet = new CSSStyleSheet
 const theme = get_theme()
 sheet.replaceSync(theme)
 
-function inputInteger () {
+function inputInteger (opts) {
+  const { min, max } = opts
   const el = document.createElement('div')
   const shadow = el.attachShadow({ mode: 'closed' })
 
   const input = document.createElement('input')
   input.type = 'number'
-  input.min = 0
-  input.max = 150
-  input.onkeyup = (e) => handle_onkeyup(e, input)
+  input.min = min //opts.min
+  input.max = max //opts.max
+  input.onkeyup = (e) => handle_onkeyup(e, input, min, max)
+  input.onmouseleave = (e) => handle_onmouseleave(e, input, min, max)
   
   shadow.append(input)
   shadow.adoptedStyleSheets = [sheet]
@@ -60,9 +62,17 @@ function get_theme () {
   `
 }
 
-function handle_onkeyup (e, input) {
-  console.log(e.target.value)
+function handle_onkeyup (e, input, min, max) {
   const val = Number(e.target.value)
-  if (val > input.max) input.value = 150
-  else if (val < input.min) input.value = 0
+
+  const val_len = val.toString().length // e.target.value.length
+  const min_len = min.toString().length
+
+  if (val > max) input.value = ''
+  else if (val_len === min_len && val < min) input.value = ''
+}
+
+function handle_onmouseleave (e, input, min) {
+  const val = Number(e.target.value)
+  if (val < min) input.value = ''
 }
